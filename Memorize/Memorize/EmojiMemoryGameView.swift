@@ -1,23 +1,57 @@
 import SwiftUI
 
-class EmojiMemoryGameView: ObservableObject {
-    @Published private var model: MemoryGame<String> = EmojiMemoryGameView.createMemoryGame()
+struct EmojiMemoryGameView: View {
+    @ObservedObject var viewModel: EmojiMemoryGame
+
+    var body: some View {
+        Grid(viewModel.cards) { card in
+            CardView(card: card).onTapGesture {
+                self.viewModel.choose(card: card)
+            }
+            .padding(5)
+        }
+        .padding()
+        .foregroundColor(Color.blue)
+    }
+}
+
+struct CardView: View {
+    var card: MemoryGame<String>.Card
     
-    private static func createMemoryGame() -> MemoryGame<String> {
-        let emojis: Array<String> = ["🤖","🤡","👻","🐥"]
-        return MemoryGame<String>(numberOfPairOfCards: emojis.count) { pairIndex in
-            return emojis[pairIndex]
+    var body: some View {
+        GeometryReader { geometry in
+            self.body(for: geometry.size)
         }
     }
-    // MARK: - Access to the Model
-    var cards: Array<MemoryGame<String>.Card> {
-        model.cards
+    
+    @ViewBuilder
+    func body(for size: CGSize) -> some View {
+        if card.isFaceUp || !card.isMatched {
+            ZStack {
+                Pie(startAngle: Angle.degrees(0-90), endAngle: Angle.degrees(360-90), clockwise: true)
+                    .padding(5).opacity(0.4)
+                Text(card.content)
+                    .font(Font.system(size: fontSize(for: size)))
+            }
+            
+            .cardify(isFaceUp: card.isFaceUp)
+        }
     }
     
-    // MARK: - Intent(s)
+
     
-    func choose(card: MemoryGame<String>.Card) {
-        model.choose(card: card)
+    // MARK: - Drawing Constants
+    
+
+    private func fontSize(for size: CGSize) -> CGFloat {
+        return min(size.width, size.height) * 0.70
     }
     
+}
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        let game = EmojiMemoryGame()
+        game.choose(card: game.cards[0])
+        return EmojiMemoryGameView(viewModel: game)
+    }
 }
