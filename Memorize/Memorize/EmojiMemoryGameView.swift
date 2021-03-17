@@ -4,14 +4,18 @@ struct EmojiMemoryGameView: View {
     @ObservedObject var viewModel: EmojiMemoryGame
 
     var body: some View {
-        Grid(viewModel.cards) { card in
-            CardView(card: card).onTapGesture {
-                self.viewModel.choose(card: card)
+        VStack {
+            Grid(viewModel.cards) { card in
+                CardView(card: card).onTapGesture {
+                    self.viewModel.choose(card: card)
+                }
+                .padding(5)
             }
-            .padding(5)
+            .padding()
+            .foregroundColor(Color.blue)
+            
+            Button("New Game", action: {self.viewModel.resetGame()})
         }
-        .padding()
-        .foregroundColor(Color.blue)
     }
 }
 
@@ -25,10 +29,10 @@ struct CardView: View {
     }
     
     @ViewBuilder
-    func body(for size: CGSize) -> some View {
+    private func body(for size: CGSize) -> some View {
         if card.isFaceUp || !card.isMatched {
             ZStack {
-                Pie(startAngle: Angle.degrees(0-90), endAngle: Angle.degrees(360-90), clockwise: true)
+                Pie(startAngle: Angle.degrees(0-90), endAngle: Angle.degrees(180-90), clockwise: true)
                     .padding(5).opacity(0.4)
                 Text(card.content)
                     .font(Font.system(size: fontSize(for: size)))
